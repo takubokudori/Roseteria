@@ -31,7 +31,7 @@ function Download-Menu($pdf_name)
     catch
     {
         # 404
-        Write-Host "$pdf_name doesn't exist"
+        Write-Host "$pdf_name not exist"
         return $false
     }
     return $true
@@ -39,7 +39,7 @@ function Download-Menu($pdf_name)
 
 function Parse-Pdf($pdftotext, $pdf_path, $opt)
 {
-    if (Test-Path $pdf_path)
+    if (!(Test-Path $pdf_path))
     {
         Write-Host "$pdf_path doesn't exist"
         return $false
@@ -66,11 +66,12 @@ function Parse-Pdf($pdftotext, $pdf_path, $opt)
         Write-Host "$out_dir/$new_path already exists"
         Remove-Item $pdf_path
         Remove-Item "temp.txt"
-        return
+        return $false
     }
     Move-Item $pdf_path $out_dir/$new_path
     Write-Host "$new_path is created"
     Remove-Item "temp.txt"
+    return $true
 }
 
 function Get-Menu($pdf_name)
@@ -83,7 +84,7 @@ function Get-Menu($pdf_name)
 
 function Parse-EventMenu($pdf_path)
 {
-    if (Test-Path $pdf_path)
+    if (!(Test-Path $pdf_path))
     {
         Write-Host "$pdf_path doesn't exist"
         return $false
