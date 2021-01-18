@@ -45,7 +45,7 @@ function Parse-Pdf($pdftotext, $pdf_path, $opt)
         return $false
     }
     Invoke-Expression "$pdftotext $pdf_path $opt temp.txt"
-    $dates = Select-String -Pattern "^[1-9]{1,2}月[1-9]{1,2}日" .\temp.txt
+    $dates = Select-String -Pattern "^[1-9]{1,2}月[1-9]{1,2}日" ./temp.txt
 
     $date = $dates[0].Line.Split("月").Split("日")
     $year = $( Get-Date ).Year
@@ -59,8 +59,9 @@ function Parse-Pdf($pdftotext, $pdf_path, $opt)
     {
         $meal = "dinner"
     }
-    # lunchYYYYMMDD.pdf
-    $new_path = [String]::Format('{0}{1:0000}{2:00}{3:00}.pdf', $meal, $year, $month, $day)
+    # lunchYYYYMMDD_hash.pdf
+    $hash = (Get-FileHash -Algorithm SHA256 ./$pdf_path).hash
+    $new_path = [String]::Format('{0}{1:0000}{2:00}{3:00}_{4}.pdf', $meal, $year, $month, $day, $hash)
     if (Test-Path $out_dir/$new_path)
     {
         Write-Host "$out_dir/$new_path already exists"
@@ -89,7 +90,7 @@ function Parse-EventMenu($pdf_path)
         Write-Host "$pdf_path doesn't exist"
         return $false
     }
-    $new_hash = (Get-FileHash -Algorithm SHA256 .\$pdf_path).hash
+    $new_hash = (Get-FileHash -Algorithm SHA256 ./$pdf_path).hash
     $is_exists = $false
     $pdfs = Get-ChildItem $out_dir/eventmenu*.pdf
     foreach ($d in $pdfs)
@@ -118,6 +119,7 @@ function Parse-EventMenu($pdf_path)
     else
     {
         Write-Host "$pdf_path is already exists"
+        Remove-Item $pdf_path
         return $false
     }
     return $true
